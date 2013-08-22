@@ -3,17 +3,17 @@ package org.grothedev.snapsaver;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.grothedev.snapserver.R;
+import org.grothedev.snapsaver.R;
 
 import android.os.Bundle;
 import android.os.Environment;
 
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -122,16 +122,17 @@ public class MainActivity extends Activity {
 	}
 	
 	private void rename(){
+		Random r = new Random(); //random int in filename to prevent overwriting
 		File[] nomedia = savedsnaps.listFiles();
 		if (nomedia != null){
 			for (int i = 0; i < nomedia.length; i++) {
-				Log.d(nomedia[i].getPath(), "");
-				if (nomedia[i].getPath().contains("jpg")){
-					nomedia[i].renameTo(new File(savedsnaps, "" + i + ".jpg"));
+				
+				if (nomedia[i].getPath().contains("jpg") && nomedia[i].getPath().contains("nomedia")){
+					nomedia[i].renameTo(new File(savedsnaps, "" + i + "-" + r.nextInt(20) + ".jpg"));
 					nomedia[i].delete();
 				}
-				if (nomedia[i].getPath().contains("mp4")){
-					nomedia[i].renameTo(new File(savedsnaps, "" + i + ".mp4"));
+				if (nomedia[i].getPath().contains("mp4") && nomedia[i].getPath().contains("nomedia")){
+					nomedia[i].renameTo(new File(savedsnaps, "" + i + "-" + r.nextInt(20) +".mp4"));
 					nomedia[i].delete();
 				}
 			}
