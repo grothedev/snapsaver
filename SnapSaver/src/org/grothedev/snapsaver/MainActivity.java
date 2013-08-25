@@ -1,7 +1,11 @@
 package org.grothedev.snapsaver;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Random;
 import java.util.Timer;
@@ -103,7 +107,7 @@ public class MainActivity extends Activity {
 		
 		try {
 			p = Runtime.getRuntime().exec("su");
-			
+			toastMessage("got root. copying videos and pictures", 2);
 			PrintStream stdin = new PrintStream(p.getOutputStream()); 
 			stdin.println("mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system");
 			stdin.println("mkdir " + extStoragePath + "/savedsnaps");
@@ -114,11 +118,54 @@ public class MainActivity extends Activity {
 			stdin.println("mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system");
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			toastMessage("don't have root. copying videos only", 2);
+			copyVids();
 		} //end root shell
 		
 		
 		
+	}
+	
+	private void copyVids() {
+		File vidsDir = new File(extStoragePath + "/Android/data/com.snapchat.android/cache/received_video_snaps/");
+		File[] vids = vidsDir.listFiles();
+		
+		if (vids != null){ //check if there are any vids to copy
+			if (savedsnaps.exists()){ //check if savedsnaps folder exists
+				for (int i = 0; i < vids.length; i++){
+					try {
+						copy(vids[i], new File(extStoragePath + "/savedsnaps/" + vids[i].getName()));
+					} catch (IOException e) {
+						
+						e.printStackTrace();
+					}
+				}
+			} else {
+				savedsnaps.mkdirs();
+				for (int i = 0; i < vids.length; i++){
+					try {
+						copy(vids[i], new File(extStoragePath + "/savedsnaps/" + vids[i].getName()));
+					} catch (IOException e) {
+						
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+	
+	public void copy(File src, File dst) throws IOException { //method taken from http://stackoverflow.com/questions/9292954/how-to-make-a-copy-of-a-file-in-android
+	    InputStream in = new FileInputStream(src);
+	    OutputStream out = new FileOutputStream(dst);
+
+	    // Transfer bytes from in to out
+	    byte[] buf = new byte[1024];
+	    int len;
+	    while ((len = in.read(buf)) > 0) {
+	        out.write(buf, 0, len);
+	    }
+	    in.close();
+	    out.close();
 	}
 	
 	private void rename(){
