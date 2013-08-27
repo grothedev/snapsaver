@@ -26,15 +26,25 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Instructions: Press the ready button. This will give you 15 seconds to open up SnapChat and wait for your snaps to load. After the 15 seconds, your snaps will copied to /storage/sdcard0/savedsnaps/. "
+        android:text="Instructions: Press the ready button. This will give you 15 seconds to open up SnapChat and wait for your snaps to load. After the 15 seconds, your snaps will copied to /storage/sdcard0/savedsnaps/. If your device is rooted, pictures and videos will be copied, if not, only videos will be copied. "
         android:textSize="20sp" />
 
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:text="Ready" />
+
+    <TextView
+        android:id="@+id/checkRoot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_below="@+id/button1"
+        android:layout_marginTop="23dp"
+        android:text="Checking for root access..."
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

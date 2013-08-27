@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -30,11 +31,16 @@ public class MainActivity extends Activity {
 	File savedsnaps = new File(extStorageFile + "/savedsnaps");
 	Button ready;
 	private Timer timer;
-
+	
+	boolean root;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		
+		checkRoot();
 		
 		ready = new Button(this); //this button will start the timer
 		ready = (Button)findViewById(R.id.button1);
@@ -49,6 +55,23 @@ public class MainActivity extends Activity {
 		timer = new Timer();
 		
 		
+	}
+
+	private void checkRoot() {
+		Process a;
+		try {
+			a = Runtime.getRuntime().exec("su");
+			root = true;
+		} catch (IOException e) {
+			root = false;
+		} 
+		
+		TextView rootText = (TextView) findViewById(R.id.checkRoot);
+		if (root){
+			rootText.setText("Your device appears to be rooted. Pictures and videos will be copied.");
+		} else {
+			rootText.setText("Your device appears to not be rooted. Only videos will be copied.");
+		}
 	}
 
 	private void startTimers(){
@@ -107,7 +130,7 @@ public class MainActivity extends Activity {
 		
 		try {
 			p = Runtime.getRuntime().exec("su");
-			toastMessage("got root. copying videos and pictures", 2);
+			toastMessage("copying videos and pictures", 2);
 			PrintStream stdin = new PrintStream(p.getOutputStream()); 
 			stdin.println("mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system");
 			stdin.println("mkdir " + extStoragePath + "/savedsnaps");
@@ -118,7 +141,7 @@ public class MainActivity extends Activity {
 			stdin.println("mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system");
 			
 		} catch (IOException e) {
-			toastMessage("don't have root. copying videos only", 2);
+			toastMessage("copying videos", 2);
 			copyVids();
 		} //end root shell
 		
