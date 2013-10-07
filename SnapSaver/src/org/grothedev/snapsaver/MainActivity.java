@@ -1,15 +1,26 @@
 package org.grothedev.snapsaver;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.grothedev.snapsaver.R;
 
@@ -48,7 +59,8 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View arg0) {
-				startTimers();
+				copyFiles();
+				startTimer();
 			}
 		});
 		
@@ -74,51 +86,27 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void startTimers(){
-		timer.schedule(new TimerTask(){ //after 15 seconds copy files. after another 10 seconds rename. 
+	private void startTimer(){
+		timer.schedule(new TimerTask(){
 
 			@Override
 			public void run() {
 				timerMethod();
 			}
 			
-		}, 15000);
-		timer.schedule(new TimerTask(){
-
-			@Override
-			public void run() {
-				timerMethod2();
-			}
-			
-		}, 25000);
-		toastMessage("Open up SnapChat and wait for your snaps to load. There will be a message notifying you that your snaps have been saved", 4);
+		}, 3000);
 	}
 	
 	private void timerMethod(){
 		this.runOnUiThread(timerTick);
 	}
-	private void timerMethod2(){
-		this.runOnUiThread(timer2Tick);
-	}
-	
 	private Runnable timerTick = new Runnable(){
-
 		@Override
 		public void run() {
-			copyFiles();
+			renameAndDecrypt();
 		}
-		
-	};
-	private Runnable timer2Tick = new Runnable(){
-
-		@Override
-		public void run() {
-			rename();
-		}
-		
 	};
 
-	
 	@Override
 	public void onBackPressed(){
 		System.exit(0);
@@ -134,11 +122,13 @@ public class MainActivity extends Activity {
 			PrintStream stdin = new PrintStream(p.getOutputStream()); 
 			stdin.println("mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system");
 			stdin.println("mkdir " + extStoragePath + "/savedsnaps");
+			stdin.println("chmod -R 777 /data/data/com.snapchat.android/cache/received_image_snaps ");
 			stdin.println("cp -r /data/data/com.snapchat.android/cache/received_image_snaps/* "
 									+ extStoragePath + "/savedsnaps");
 			stdin.println("cp -r /storage/sdcard0/Android/data/com.snapchat.android/cache/received_video_snaps/* "
 					+ extStoragePath + "/savedsnaps");
 			stdin.println("mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system");
+			
 			
 		} catch (IOException e) {
 			toastMessage("copying videos", 2);
@@ -191,23 +181,85 @@ public class MainActivity extends Activity {
 	    out.close();
 	}
 	
-	private void rename(){
+	private void renameAndDecrypt(){
 		Random r = new Random(); //random int in filename to prevent overwriting
 		File[] nomedia = savedsnaps.listFiles();
 		if (nomedia != null){
 			for (int i = 0; i < nomedia.length; i++) {
 				
 				if (nomedia[i].getPath().contains("jpg") && nomedia[i].getPath().contains("nomedia")){
-					nomedia[i].renameTo(new File(savedsnaps, "" + i + "-" + r.nextInt(20) + ".jpg"));
+					
+					String fileName = i + "-" + r.nextInt(20) + ".jpg";
+					File encryptedFile = new File(savedsnaps, fileName);
+					
+					nomedia[i].renameTo(encryptedFile);
 					nomedia[i].delete();
+					
+					decrypt(encryptedFile);
+					
 				}
 				if (nomedia[i].getPath().contains("mp4") && nomedia[i].getPath().contains("nomedia")){
-					nomedia[i].renameTo(new File(savedsnaps, "" + i + "-" + r.nextInt(20) +".mp4"));
+					
+					String fileName = i + "-" + r.nextInt(20) +".mp4";
+					File encryptedFile = new File(savedsnaps, fileName);
+					
+					nomedia[i].renameTo(encryptedFile);
 					nomedia[i].delete();
+					
+					decrypt(encryptedFile);
 				}
 			}
 			toastMessage("snaps saved", 1);
 		}
+	}
+	
+	public void decrypt(File f){
+		try {
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+			cipher.init(2, new SecretKeySpec("M02cnQ51Ji97vwT4".getBytes(), "AES")); //encryption key found in snapchat source 
+			
+			byte[] fBytes = (byte[]) fileToBytes(f);
+			
+			byte[] unencryptedBytes = cipher.doFinal(fBytes);
+			
+			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
+			out.write(unencryptedBytes);
+			out.flush();
+			out.close();
+			
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public byte[] fileToBytes(File f){ //method taken from http://stackoverflow.com/questions/10039672/android-how-to-read-file-in-bytes
+		
+		byte[] bytes = new byte[ (int)f.length() ];
+		
+		try {
+			BufferedInputStream buf = new BufferedInputStream(new FileInputStream(f));
+			buf.read(bytes, 0, bytes.length);
+			buf.close();
+			return bytes;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 	
 	private void toastMessage(String string, int dur) {
