@@ -8,43 +8,68 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"
-        android:text="Thank you for using SnapSaver by Thomas Grothe. If you like my work, feel free to donate via paypal to grothedev@gmail.com"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="12sp" />
-
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Instructions: Open up snapchat and wait for your snaps to load, then open up snapsaver and click the 'ready' button. Your snaps will be in a folder called 'savedsnaps' in the root of your sdcard."
+        android:text="@string/instructions"
         android:textSize="20sp" />
 
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/checkVids"
+        android:layout_marginLeft="34dp"
+        android:layout_toRightOf="@+id/checkVids"
+        android:text="Save Snaps" />
+
+    <CheckBox
+        android:id="@+id/checkVids"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
         android:layout_below="@+id/textView1"
-        android:layout_centerHorizontal="true"
-        android:text="Ready" />
+        android:layout_marginLeft="19dp"
+        android:text="Videos" />
+
+    <CheckBox
+        android:id="@+id/checkPics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/checkVids"
+        android:layout_below="@+id/button1"
+        android:text="Pictures" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:text="Thank you for using SnapSaver by Thomas Grothe. If you like my work, feel free to donate via paypal to grothedev@gmail.com"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/checkRoot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView1"
-        android:layout_below="@+id/button1"
-        android:layout_marginTop="23dp"
+        android:layout_above="@+id/textView3"
+        android:layout_centerHorizontal="true"
         android:text="Checking for root access..."
         android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <CheckBox
+        android:id="@+id/checkStories"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/checkPics"
+        android:layout_below="@+id/checkPics"
+        android:layout_marginTop="18dp"
+        android:text="Stories (disabled until i figure out how to decrypt stories)" />
 
 </RelativeLayout>

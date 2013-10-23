@@ -4,5 +4,6 @@
     <string name="app_name">SnapSaver</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="instructions">Instructions: Open up snapchat and wait for your snaps to load, then open up snapsaver. Select which snaps you would like to save, then click the \'ready\' button. Your snaps will be in a folder called \'savedsnaps\' in the root of your sdcard.</string>
 
 </resources>
